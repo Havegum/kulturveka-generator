@@ -11,6 +11,7 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  padding-top: 1em;
 }
 
 #content {
@@ -21,6 +22,11 @@ body {
   width: 40em;
   background-color: white;
   box-shadow: 0 .2em 1em #0002;
+}
+
+h1 {
+  font-size: 1.8em;
+  margin: 1.5em 0 .5em;
 }
 
 h2 {
@@ -35,4 +41,20 @@ h3 {
 mark {
   text-decoration: underline;
   background-color: initial;
+}
+
+input {
+  font-size: 1em;
+  font-family: inherit;
+  padding: .2em .4em;
+}
+
+label span {
+  color: darkgrey;
+  font-style: italic;
+}
+
+input, label {
+  cursor: pointer;
+  display:inline-block;
 }

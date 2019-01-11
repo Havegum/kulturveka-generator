@@ -1,13 +1,34 @@
 const DAGER = ['Måndag', 'Tysdag', 'Onsdag', 'Torsdag', 'Fredag', 'Laurdag', 'Søndag'];
 const DAGER_BOKMAL = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lørdag', 'Søndag'];
+let parse = parseCSV('\t');
+let eventsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT3xJC11F5tBLqNYTETN8hAdqBy0OV3vTMt6VjdLLVcvGi_yo0N2fSp8FY9SRFhaI-Pr-FzYnc86Ycj/pub?gid=0&single=true&output=tsv';
+let EVENTS = getURL(eventsURL).then(parse).catch(console.error);
+let TODAY = new Date();
+
 
 window.onload = async function () {
-  let parse = parseCSV('\t');
-  let eventsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT3xJC11F5tBLqNYTETN8hAdqBy0OV3vTMt6VjdLLVcvGi_yo0N2fSp8FY9SRFhaI-Pr-FzYnc86Ycj/pub?gid=0&single=true&output=tsv';
 
   // TODO: Calculate these based on TODAY or user input
-  let startDateLimit = new Date('2019-01-28');
-  let endDateLimit = new Date('2019-02-11');
+
+  let startDate = getNextWednesday(TODAY);
+
+  findRelevantEvents(startDate);
+
+  let input = <HTMLInputElement> document.getElementById('startdate');
+  if(input) input.addEventListener('change', function(evt) {
+    if(input) {
+      let date = getNextWednesday(new Date(input.value));
+      findRelevantEvents(date);
+      input.valueAsDate = date;
+    }
+  });
+
+};
+
+async function findRelevantEvents(startDate:Date, endDate?:Date) {
+  let startDateLimit = startDate;
+  let endDateLimit = dateOrDefault(endDate, startDate);
+
 
   let dates = [];
   let currentDate = startDateLimit;
@@ -18,41 +39,61 @@ window.onload = async function () {
     currentDate.setDate(currentDate.getDate() + 1);
   }
 
-  // for (let i = 0; i < dates.length; i++) {
-  //   let arr = [];
-  //   arr[2] = dates[i]
-  //   dates[i] = arr;
-  // }
-
-  let events = await getURL(eventsURL).then(parse).catch(console.error);
+  let events = await EVENTS;
   if(!events) return;
 
-  let weeklies = events.filter(evt => evt[])
+  let weeklies:any[][] = [];
+  events.filter(evt => DAGER_BOKMAL.indexOf(evt[2]) > -1)
+    .forEach(evt => {
+      let day:number = DAGER_BOKMAL.indexOf(evt[2]);
+      let currentDay:number = (startDateLimit.getDay() + 5) % 6; // +5%6 makes monday first day
+      let dayHasPassed:boolean = day < currentDay;
 
-  let filteredEvts = events.map(parseDateInArray(2))
-    .filter(evt => evt[2] != NaN)
+      let upcomingEvt:any[] = [evt[0], evt[1], null, evt[3]];
+      let nextWeekEvt:any[] = [evt[0], evt[1], null, evt[3]];
+
+
+      // if day has passed, add 7 subtract the difference
+      upcomingEvt[2] = new Date(startDateLimit.getTime() +
+        (day - currentDay + (dayHasPassed ? 7 : 0)) * 24*60*60*1000);
+      weeklies.push(upcomingEvt);
+
+      // this is hackish but it works without breaking my brain
+      nextWeekEvt[2] = new Date(startDateLimit.getTime() +
+      (day - currentDay + (7 + (dayHasPassed ? 7 : 0))) * 24*60*60*1000);
+      weeklies.push(nextWeekEvt);
+    });
+
+  let filteredEvts = events
+    .map(parseDateInArray(2))
+    .filter(evt => evt[2] instanceof Date)
+    // .map(e => {console.log(e);return e;})
     .filter(evt => (<Date> evt[2]).valueOf() > startDateLimit.valueOf())
     .filter(evt => (<Date> evt[2]).valueOf() < endDateLimit.valueOf())
+    .concat(weeklies)
     .concat(dates)
     .sort((a:any[] | Date, b:any[] | Date) => {
       let date_a = a instanceof Array ? a[2].valueOf() : a.valueOf() - 1;
       let date_b = b instanceof Array ? b[2].valueOf() : b.valueOf() - 1;
-
       return Math.sign(date_a - date_b);
-    })
+    });
 
   let wrapper = <HTMLElement> document.getElementById('content');
+
+  while(wrapper.firstChild) {
+    wrapper.removeChild(wrapper.firstChild);
+  }
 
   filteredEvts.map(evt => drawListItemFromEvent(evt))
     .forEach(elem => wrapper.appendChild(elem));
 
-};
+}
 
 function drawListItemFromEvent(evt: any[] | Date):DocumentFragment {
   let wrapper = document.createDocumentFragment();
 
   if(evt instanceof Array) {
-    let time = evt[3] === '' ? '' : evt[3].replace(':', '.');
+    let time = evt[3] === '' ? '' : ', ' + evt[3].replace(':', '.');
 
     let title = document.createElement('h3');
     let title_inner = document.createElement('b');
@@ -62,13 +103,13 @@ function drawListItemFromEvent(evt: any[] | Date):DocumentFragment {
 
     let details = document.createElement('p');
     let details_inner = document.createElement('mark');
-    details_inner.textContent = evt[1] + ', ' + time;
+    details_inner.textContent = evt[1] + time;
     details.appendChild(details_inner);
     wrapper.appendChild(details);
 
   } else {
     let time = document.createElement('h2');
-    time.textContent = DAGER[evt.getDay() - 1];
+    time.textContent = DAGER[(evt.getDay() + 6) % 7] + ' ' + leadingZero(evt.getDate());
     wrapper.appendChild(time);
   }
 
@@ -102,15 +143,45 @@ function parseCSV(delimeter: string) {
   }
 }
 
+function dateOrDefault(end:Date | undefined, start:Date):Date {
+  if(end) return end;
+
+  let newDate = new Date(start.valueOf());
+  newDate.setDate(start.getDate() + 14);
+  return newDate;
+}
+
 function parseDateInArray(n:number): (arr:any[]) => any[] {
   return function (arr:any[]): any[] {
-    if(arr[n].match(/\d\d\.\d\d\.\d{4}/)) {
+    if(typeof arr[n] == 'string' && arr[n].match(/\d\d\.\d\d\.\d{4}/)) {
       let d:number[] = (<string> arr[n]).trim().split('.').map(n => +n);
       arr[n] = new Date(d[2], d[1]-1, d[0]);
-    } else {
-      arr[n] = NaN;
     }
     return arr;
-
   }
+}
+
+function getNextWednesday(date?:Date):Date {
+  let nextWednesday = date || new Date();
+  let day = nextWednesday.getDay();
+  if (day <= 3) {
+    nextWednesday.setDate(nextWednesday.getDate() + (3 - nextWednesday.getDay()));
+  } else {
+    nextWednesday.setDate((nextWednesday.getDate() - (day + 6) % 7) + 2 + 7);
+  }
+  return nextWednesday;
+}
+
+function copyToClipboard(innerHTML:string):void {
+  function listener (evt:any) {
+    evt.clipboardData.setData("text/html", innerHTML);
+    evt.clipboardData.setData("text/plain", innerHTML);
+  }
+  document.addEventListener("copy", listener);
+  document.execCommand("copy");
+  document.removeEventListener("copy", listener);
+}
+
+function leadingZero(n:number):string {
+  return '' + (n > 9 ? n : '0' + n);
 }
