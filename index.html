@@ -2,19 +2,24 @@
 <html lang="nb" dir="ltr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Kulturveka generator</title>
   <link rel="stylesheet" href="./main.css">
   <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png">
 </head>
 <body>
-  <h1>Kulturveka generator</h1>
+  <h1>Kulturveka-generator</h1>
   <div>
-    <label for="startdate">Startdato <span>(Generatoren starter fra datoens førstkommende onsdag)</span>:</label>
+    <label for="startdate">Startdato:</label>
     <input id="startdate" type="date" name="" value="">
+    <label for="startdate"><span>(Generatoren starter fra datoens førstkommende onsdag)</span></label>
   </div>
   <div id="content">
+    <button id="clipBTN" onclick="copyToClip(document.getElementById('generated').innerHTML); this.classList.add('clipboarded'); this.textContent='Kopiert!'">Kopier til utklippstavle</button>
+    <div id="generated">
+    </div>
   </div>
-<script src="./main.js" charset="utf-8"></script>
+
+  <footer>Utviklet av Halvard Alvheim Vegum – <a href="https://github.com/Havegum/kulturveka-generator">GitHub repository</a></footer>
+  <script src="./main.js" charset="utf-8"></script>
 </body>
 </html>

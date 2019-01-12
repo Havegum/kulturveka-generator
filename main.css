@@ -12,26 +12,117 @@ body {
   justify-content: center;
   align-items: center;
   padding-top: 1em;
+  background-image: url('dotwork_1b.gif');
+  background-size: 22em;
 }
 
 #content {
-  flex-basis: 40em;
+  display: flex;
   padding: 1em 2em 3em;
-  margin: 1em;
   border-radius: .5em;
-  width: 40em;
-  background-color: white;
+  margin: 1em;
   box-shadow: 0 .2em 1em #0002;
+  background-color: white;
+  flex-direction: column;
+}
+
+button {
+  display: block;
+  position: relative;
+  cursor: pointer;
+  background-color: #169754;
+  min-width: 15em;
+  align-self: flex-end;
+
+  color: white;
+  font-size: 1em;
+  font-weight: bold;
+  font-family: inherit;
+
+  padding: 1em 2em;
+  margin: 1em 0 3em;
+  border: none;
+  border-radius: .5em;
+  box-shadow: 0 3px 6px #0003;
+}
+
+button:hover {
+  box-shadow: 0 4px 12px #0003;
+  bottom: 1px;
+}
+
+button:active {
+  box-shadow: 0 3px 6px #0003;
+  bottom: -1px;
+}
+
+@-webkit-keyframes activated {
+  0% {background-color: #70ffb5}
+  100% {background-color: darkgrey}
+}
+
+
+@-moz-keyframes activated {
+  0% {background-color: #70ffb5}
+  100% {background-color: darkgrey}
+}
+
+
+@-o-keyframes activated {
+  0% {background-color: #70ffb5}
+  100% {background-color: darkgrey}
+}
+
+
+@keyframes activated {
+  0% {background-color: #70ffb5}
+  100% {background-color: darkgrey}
+}
+
+.clipboarded {
+  background-color: darkgrey;
+  cursor: default;
+  box-shadow: 0 3px 6px #0003;
+  bottom: -1px;
+
+  -webkit-animation: activated 1s ease-out;
+     -moz-animation: activated 1s ease-out;
+       -o-animation: activated 1s ease-out;
+          animation: activated 1s ease-out;
+}
+
+.clipboarded:hover,
+.clipboarded:active {
+  box-shadow: 0 3px 6px #0003;
+  bottom: -1px;
+}
+
+#generated {
+  display: flex;
+  flex-flow: column wrap;
+  max-height: 70em;
+  width: 60em;
 }
 
 h1 {
   font-size: 1.8em;
   margin: 1.5em 0 .5em;
+  color: #169754;
+}
+
+h2::before {
+  content: '';
+  display: block;
+  height: .4em;
+  max-width: 7em;
+  background-color: black;
+  margin-bottom: .1em;
 }
 
 h2 {
   margin-top: 1em;
   font-size: 2em;
+  text-transform: uppercase;
 }
 
 h3 {
@@ -50,7 +141,7 @@ input {
 }
 
 label span {
-  color: darkgrey;
+  color: #888;
   font-style: italic;
 }
 
@@ -58,3 +149,15 @@ input, label {
   cursor: pointer;
   display:inline-block;
 }
+
+footer {
+  margin-bottom: 1em;
+  font-size: .9em;
+}
+
+footer a {
+  color: #757575;
+  text-decoration: none;
+}
+
+footer a:hover { text-decoration: underline; color: #169754 }

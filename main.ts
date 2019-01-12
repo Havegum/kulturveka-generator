@@ -15,14 +15,17 @@ window.onload = async function () {
   findRelevantEvents(startDate);
 
   let input = <HTMLInputElement> document.getElementById('startdate');
-  if(input) input.addEventListener('change', function(evt) {
+  if(input) input.addEventListener('change', function() {
     if(input) {
       let date = getNextWednesday(new Date(input.value));
       findRelevantEvents(date);
       input.valueAsDate = date;
+
+      let clipboardBTN = <HTMLElement> document.getElementById('clipBTN');
+      clipboardBTN.textContent = 'Kopier til utklippstavle';
+      clipboardBTN.classList.remove('clipboarded');
     }
   });
-
 };
 
 async function findRelevantEvents(startDate:Date, endDate?:Date) {
@@ -52,7 +55,6 @@ async function findRelevantEvents(startDate:Date, endDate?:Date) {
       let upcomingEvt:any[] = [evt[0], evt[1], null, evt[3]];
       let nextWeekEvt:any[] = [evt[0], evt[1], null, evt[3]];
 
-
       // if day has passed, add 7 subtract the difference
       upcomingEvt[2] = new Date(startDateLimit.getTime() +
         (day - currentDay + (dayHasPassed ? 7 : 0)) * 24*60*60*1000);
@@ -78,7 +80,7 @@ async function findRelevantEvents(startDate:Date, endDate?:Date) {
       return Math.sign(date_a - date_b);
     });
 
-  let wrapper = <HTMLElement> document.getElementById('content');
+  let wrapper = <HTMLElement> document.getElementById('generated');
 
   while(wrapper.firstChild) {
     wrapper.removeChild(wrapper.firstChild);
@@ -95,21 +97,38 @@ function drawListItemFromEvent(evt: any[] | Date):DocumentFragment {
   if(evt instanceof Array) {
     let time = evt[3] === '' ? '' : ', ' + evt[3].replace(':', '.');
 
-    let title = document.createElement('h3');
-    let title_inner = document.createElement('b');
-    title_inner.textContent = evt[0];
-    title.appendChild(title_inner);
-    wrapper.appendChild(title);
+    // let title = document.createElement('h3');
+    // title.style.fontSize = '1em';
+    // title.style.fontFamily = "'roboto', sans-serif";
+    // let title_inner = document.createElement('b');
+    // title_inner.textContent = evt[0];
+    // title.appendChild(title_inner);
+    // wrapper.appendChild(title);
 
     let details = document.createElement('p');
-    let details_inner = document.createElement('mark');
-    details_inner.textContent = evt[1] + time;
-    details.appendChild(details_inner);
+
+    let title = document.createElement('span');
+    title.style.fontSize = '1em';
+    title.style.fontFamily = "'roboto', sans-serif";
+    title.style.fontWeight = "bold";
+    title.textContent = evt[0];
+    details.appendChild(title);
+
+    details.appendChild(document.createElement('br'));
+
+    let placeTime = document.createElement('span');
+    placeTime.style.textDecoration = 'underline';
+    placeTime.style.fontSize = '1em';
+    placeTime.style.fontFamily = "'roboto', sans-serif";
+    placeTime.textContent = evt[1] + time;
+    details.appendChild(placeTime);
+
     wrapper.appendChild(details);
 
   } else {
     let time = document.createElement('h2');
     time.textContent = DAGER[(evt.getDay() + 6) % 7] + ' ' + leadingZero(evt.getDate());
+    time.style.fontFamily = "'roboto', sans-serif";
     wrapper.appendChild(time);
   }
 
@@ -172,10 +191,11 @@ function getNextWednesday(date?:Date):Date {
   return nextWednesday;
 }
 
-function copyToClipboard(innerHTML:string):void {
-  function listener (evt:any) {
-    evt.clipboardData.setData("text/html", innerHTML);
-    evt.clipboardData.setData("text/plain", innerHTML);
+function copyToClip(str:string) {
+  function listener(e:any) {
+    e.clipboardData.setData("text/html", str);
+    e.clipboardData.setData("text/plain", str);
+    e.preventDefault();
   }
   document.addEventListener("copy", listener);
   document.execCommand("copy");
