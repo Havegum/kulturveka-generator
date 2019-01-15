@@ -46,14 +46,14 @@ async function findRelevantEvents(startDate:Date, endDate?:Date) {
   if(!events) return;
 
   let weeklies:any[][] = [];
-  events.filter(evt => DAGER_BOKMAL.indexOf(evt[2]) > -1)
+  events.filter(evt => DAGER_BOKMAL.indexOf(evt[3]) > -1)
     .forEach(evt => {
-      let day:number = DAGER_BOKMAL.indexOf(evt[2]);
+      let day:number = DAGER_BOKMAL.indexOf(evt[3]);
       let currentDay:number = (startDateLimit.getDay() + 5) % 6; // +5%6 makes monday first day
       let dayHasPassed:boolean = day < currentDay;
 
-      let upcomingEvt:any[] = [evt[0], evt[1], null, evt[3]];
-      let nextWeekEvt:any[] = [evt[0], evt[1], null, evt[3]];
+      let upcomingEvt:any[] = [evt[0], evt[1], null, evt[4]];
+      let nextWeekEvt:any[] = [evt[0], evt[1], null, evt[4]];
 
       // if day has passed, add 7 subtract the difference
       upcomingEvt[2] = new Date(startDateLimit.getTime() +
@@ -120,7 +120,7 @@ function drawListItemFromEvent(evt: any[] | Date):DocumentFragment {
     placeTime.style.textDecoration = 'underline';
     placeTime.style.fontSize = '1em';
     placeTime.style.fontFamily = "'roboto', sans-serif";
-    placeTime.textContent = evt[1] + time;
+    placeTime.textContent = evt[1].trim() + time;
     details.appendChild(placeTime);
 
     wrapper.appendChild(details);
