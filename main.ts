@@ -49,7 +49,7 @@ async function findRelevantEvents(startDate:Date, endDate?:Date) {
   events.filter(evt => DAGER_BOKMAL.indexOf(evt[3]) > -1)
     .forEach(evt => {
       let day:number = DAGER_BOKMAL.indexOf(evt[3]);
-      let currentDay:number = (startDateLimit.getDay() + 5) % 6; // +5%6 makes monday first day
+      let currentDay:number = (startDateLimit.getDay() + 6) % 7; // +5%6 makes monday first day
       let dayHasPassed:boolean = day < currentDay;
 
       let upcomingEvt:any[] = [evt[0], evt[1], null, evt[4]];
