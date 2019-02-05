@@ -2,14 +2,11 @@ const DAGER = ['Måndag', 'Tysdag', 'Onsdag', 'Torsdag', 'Fredag', 'Laurdag', 'S
 const DAGER_BOKMAL = ['Mandag', 'Tirsdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lørdag', 'Søndag'];
 let parse = parseCSV('\t');
 let eventsURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT3xJC11F5tBLqNYTETN8hAdqBy0OV3vTMt6VjdLLVcvGi_yo0N2fSp8FY9SRFhaI-Pr-FzYnc86Ycj/pub?gid=0&single=true&output=tsv';
-let EVENTS = getURL(eventsURL).then(parse).catch(console.error);
+let EVENTS = getURL(eventsURL).then(parse)/*.then(e=>{console.log(e);return e})*/.catch(console.error);
 let TODAY = new Date();
 
 
 window.onload = async function () {
-
-  // TODO: Calculate these based on TODAY or user input
-
   let startDate = getNextWednesday(TODAY);
 
   findRelevantEvents(startDate);
@@ -49,34 +46,36 @@ async function findRelevantEvents(startDate:Date, endDate?:Date) {
   events.filter(evt => DAGER_BOKMAL.indexOf(evt[3]) > -1)
     .forEach(evt => {
       let day:number = DAGER_BOKMAL.indexOf(evt[3]);
-      let currentDay:number = (startDateLimit.getDay() + 6) % 7; // +5%6 makes monday first day
+      let currentDay:number = (startDateLimit.getDay() + 6) % 7; // +6%7 makes monday first day
       let dayHasPassed:boolean = day < currentDay;
 
-      let upcomingEvt:any[] = [evt[0], evt[1], null, evt[4]];
-      let nextWeekEvt:any[] = [evt[0], evt[1], null, evt[4]];
+      let upcomingEvt:any[] = [evt[0], evt[1], null, null, evt[4]];
+      let nextWeekEvt:any[] = [evt[0], evt[1], null, null, evt[4]];
 
       // if day has passed, add 7 subtract the difference
-      upcomingEvt[2] = new Date(startDateLimit.getTime() +
+      upcomingEvt[3] = new Date(startDateLimit.getTime() +
         (day - currentDay + (dayHasPassed ? 7 : 0)) * 24*60*60*1000);
       weeklies.push(upcomingEvt);
 
       // this is hackish but it works without breaking my brain
-      nextWeekEvt[2] = new Date(startDateLimit.getTime() +
+      nextWeekEvt[3] = new Date(startDateLimit.getTime() +
       (day - currentDay + (7 + (dayHasPassed ? 7 : 0))) * 24*60*60*1000);
       weeklies.push(nextWeekEvt);
     });
 
+  console.log('trying to map and filter')
   let filteredEvts = events
-    .map(parseDateInArray(2))
-    .filter(evt => evt[2] instanceof Date)
-    // .map(e => {console.log(e);return e;})
-    .filter(evt => (<Date> evt[2]).valueOf() > startDateLimit.valueOf())
-    .filter(evt => (<Date> evt[2]).valueOf() < endDateLimit.valueOf())
+    .filter(evt => evt[0] != '')
+    .map(parseDateInArray(3))
+    .map(e => { console.log(e); return e; })
+    .filter(evt => evt[3] instanceof Date)
+    .filter(evt => (<Date> evt[3]).valueOf() > startDateLimit.valueOf())
+    .filter(evt => (<Date> evt[3]).valueOf() < endDateLimit.valueOf())
     .concat(weeklies)
     .concat(dates)
     .sort((a:any[] | Date, b:any[] | Date) => {
-      let date_a = a instanceof Array ? a[2].valueOf() : a.valueOf() - 1;
-      let date_b = b instanceof Array ? b[2].valueOf() : b.valueOf() - 1;
+      let date_a = a instanceof Array ? a[3].valueOf() : a.valueOf() - 1;
+      let date_b = b instanceof Array ? b[3].valueOf() : b.valueOf() - 1;
       return Math.sign(date_a - date_b);
     });
 
@@ -95,7 +94,7 @@ function drawListItemFromEvent(evt: any[] | Date):DocumentFragment {
   let wrapper = document.createDocumentFragment();
 
   if(evt instanceof Array) {
-    let time = evt[3] === '' ? '' : ', ' + evt[3].replace(':', '.');
+    let time = evt[4] === '' ? '' : ', ' + evt[4].replace(':', '.');
 
     // let title = document.createElement('h3');
     // title.style.fontSize = '1em';
