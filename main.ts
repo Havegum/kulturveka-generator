@@ -63,11 +63,11 @@ async function findRelevantEvents(startDate:Date, endDate?:Date) {
       weeklies.push(nextWeekEvt);
     });
 
-  console.log('trying to map and filter')
+  // console.log('trying to map and filter')
   let filteredEvts = events
     .filter(evt => evt[0] != '')
     .map(parseDateInArray(3))
-    .map(e => { console.log(e); return e; })
+    // .map(e => { console.log(e); return e; })
     .filter(evt => evt[3] instanceof Date)
     .filter(evt => (<Date> evt[3]).valueOf() > startDateLimit.valueOf())
     .filter(evt => (<Date> evt[3]).valueOf() < endDateLimit.valueOf())

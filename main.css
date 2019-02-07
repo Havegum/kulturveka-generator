@@ -17,13 +17,12 @@ body {
 }
 
 #content {
-  display: flex;
   padding: 1em 2em 3em;
   border-radius: .5em;
   margin: 1em;
   box-shadow: 0 .2em 1em #0002;
   background-color: white;
-  flex-direction: column;
+  min-width: 40em;
 }
 
 button {
@@ -40,7 +39,7 @@ button {
   font-family: inherit;
 
   padding: 1em 2em;
-  margin: 1em 0 3em;
+  margin: 1em 0 3em auto;
   border: none;
   border-radius: .5em;
   box-shadow: 0 3px 6px #0003;
@@ -99,9 +98,7 @@ button:active {
 
 #generated {
   display: flex;
-  flex-flow: column wrap;
-  max-height: 70em;
-  width: 60em;
+  flex-flow: column;
 }
 
 h1 {
